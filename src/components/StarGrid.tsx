@@ -1,10 +1,115 @@
 "use client";
 
 import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 
 export default function StarGrid() {
-  const grid = [14, 30] as const;
   const container = useRef<SVGSVGElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  gsap.registerPlugin(useGSAP);
+
+  const grid = [14, 30] as const;
+
+  useGSAP(
+    () => {
+      if (prefersReducedMotion || !container.current) {
+        gsap.set(container.current, {
+          opacity: 1,
+        });
+        gsap.set(".star-grid-item", {
+          opacity: 0.2,
+          scale: 1,
+          color: "#fff",
+        });
+        return;
+      }
+
+      gsap.set(".star-grid-item", {
+        opacity: 0,
+        transformOrigin: "center",
+        color: "#fff",
+      });
+      gsap.set(container.current, {
+        opacity: 1,
+      });
+      const tl = gsap.timeline();
+
+      // Entrance animation
+      tl.to(".star-grid-item", {
+        keyframes: [
+          { opacity: 0, duration: 0 },
+          {
+            opacity: 0.4,
+            rotate: "+=180",
+            color: "#ffd057",
+            scale: 3,
+            duration: 0.6,
+            stagger: {
+              // The amount of time that the entire animation takes
+              amount: 2,
+              grid: grid,
+              from: "center",
+            },
+          },
+          {
+            opacity: 0.2,
+            rotate: "+=180",
+            color: "#fff",
+            scale: 1,
+            // This way it will start earlier
+            delay: -2,
+            duration: 0.6,
+            stagger: {
+              // The amount of time that the entire animation takes
+              amount: 2,
+              grid: grid,
+              from: "center",
+            },
+          },
+        ],
+      });
+
+      // Loop animation
+      tl.to(".star-grid-item", {
+        delay: 8,
+        repeat: -1,
+        repeatDelay: 8,
+        keyframes: [
+          {
+            opacity: 0.4,
+            rotate: "+=180",
+            color: "#ffd057",
+            scale: 3,
+            duration: 0.6,
+            stagger: {
+              // The amount of time that the entire animation takes
+              amount: 2,
+              grid: grid,
+              from: "center",
+            },
+          },
+          {
+            opacity: 0.2,
+            rotate: "+=180",
+            color: "#fff",
+            scale: 1,
+            // This way it will start earlier
+            delay: -2,
+            duration: 0.6,
+            stagger: {
+              // The amount of time that the entire animation takes
+              amount: 2,
+              grid: grid,
+              from: "center",
+            },
+          },
+        ],
+      });
+    },
+    { scope: container },
+  );
 
   return (
     <svg
@@ -14,7 +119,7 @@ export default function StarGrid() {
       className="absolute -top-14 -z-10"
       id="star-grid"
       ref={container}
-      opacity={1}
+      opacity={0}
       style={{
         maskImage: "linear-gradient(black, transparent)",
       }}
